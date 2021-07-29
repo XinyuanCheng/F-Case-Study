@@ -59,7 +59,7 @@ import streamlit as st
 import datetime as dt
 import pandas as pd
 import plotly_express as px
-from dateutil.relativedelta import relativedelta # to add days or years
+# from dateutil.relativedelta import relativedelta # to add days or years
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error 
