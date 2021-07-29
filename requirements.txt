@@ -8,7 +8,7 @@ pipenv==2021.5.29
 
 plotly==5.1.0
 plotly-express==0.4.1
-
+python-dateutil==2.8.1
 
 pyarrow==3.0.0
 
