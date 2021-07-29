@@ -67,7 +67,9 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error 
 import matplotlib.pyplot as plt
 from pandas.tseries.holiday import USFederalHolidayCalendar as calendar
+import os
 
+os.environ['TZ'] = 'UTC'
 
 
 st.title("Which forecast is better: ours, or the market operators?")
@@ -394,6 +396,6 @@ st.subheader('Part III: Forecast Outliers')
 
 st.write("This part lists top 20 of our prediction ourliers based on absolute difference")
 
-df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['our_abs'] = abs(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['actualValue'] - df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['ourForecast'])
+df = df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['our_abs'] = abs(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['actualValue'] - df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['ourForecast'])
 # df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values('our_abs',ascending=False)
 st.dataframe(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values(by='our_abs',ascending=False).head(20))
