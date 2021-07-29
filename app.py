@@ -69,7 +69,7 @@ from pandas.tseries.holiday import USFederalHolidayCalendar as calendar
 # st.set_page_config(layout="wide")  # this needs to be the first Streamlit command called
 st.title("Which forecast is better: ours, or the market operators?")
 
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_data():
     conn = snowflake.connector.connect(
                 user="XCHENG",
