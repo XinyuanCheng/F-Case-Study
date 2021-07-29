@@ -56,6 +56,8 @@ import snowflake.connector
 # # @st.cache
 
 import streamlit as st
+
+# st.set_page_config(layout="wide")  # this needs to be the first Streamlit command called
 import datetime as dt
 import pandas as pd
 import plotly_express as px
@@ -66,7 +68,8 @@ from sklearn.metrics import mean_absolute_error
 import matplotlib.pyplot as plt
 from pandas.tseries.holiday import USFederalHolidayCalendar as calendar
 
-# st.set_page_config(layout="wide")  # this needs to be the first Streamlit command called
+
+
 st.title("Which forecast is better: ours, or the market operators?")
 
 @st.cache(allow_output_mutation=True)
@@ -105,10 +108,13 @@ st.markdown('This app is used to compared the performance of forecasting of elec
 
 st.subheader('Part I: By Criteria')
 
+
 criteria1 = ['Default', 'Weekday', 'Weekend', 'Holiday']
 criteria2 = ['R2', 'RMSE', 'MAE']
-choose1 = st.sidebar.selectbox("Pick a criteria", criteria1)
-choose2 = st.sidebar.selectbox("Pick an evaluation metric", criteria2)
+
+choose1 = st.selectbox("Pick a criteria", criteria1)
+choose2 = st.selectbox("Pick an evaluation metric", criteria2)
+
 
 # if st.sidebar.button('Get metrics performance'):
 if choose1 == 'Default':
@@ -367,7 +373,7 @@ their_mae = mean_absolute_error(df[(df['startTime']<=slider_range[1])&(df['start
 
 # Table formatting
 data_table = [[our_r2, their_r2, "We are better" if our_r2 > their_r2 else "They are better"], [our_rmse, their_rmse, "We are better" if our_rmse < their_rmse else "They are better"], [our_mae, their_mae, "We are better" if our_mae < their_mae else "They are better"]]
-df_table = pd.DataFrame(data_table, columns = ['Our Forecast', 'Their Forecast', "Who has a better forecast?"])
+df_table = pd.DataFrame(data_table, columns = ['Our Forecast', 'Their Forecast', "Who has a better forecast?"], index = ['r2', 'rmse', 'mae'])
 st.dataframe(df_table)
 
 # st.write('r2 score of our forecast:', our_r2)
@@ -383,3 +389,11 @@ st.dataframe(df_table)
 
 fig = px.line(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])], x='startTime', y=df.columns[1:4])
 st.plotly_chart(fig)
+
+st.subheader('Part III: Forecast Outliers')
+
+st.write("This part lists top 20 of our prediction ourliers based on absolute difference")
+
+df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['our_abs'] = abs(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['actualValue'] - df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['ourForecast'])
+# df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values('our_abs',ascending=False)
+st.dataframe(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values('our_abs',ascending=False).head(20))
