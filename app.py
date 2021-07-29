@@ -396,4 +396,4 @@ st.write("This part lists top 20 of our prediction ourliers based on absolute di
 
 df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['our_abs'] = abs(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['actualValue'] - df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])]['ourForecast'])
 # df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values('our_abs',ascending=False)
-st.dataframe(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values('our_abs',ascending=False).head(20))
+st.dataframe(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values(by='our_abs',ascending=False).head(20))
