@@ -1,8 +1,4 @@
-# import streamlit as st
-# import time
-# import numpy as np
-# import pandas as pd
-from load_data_from_snowflake import *
+# from load_data_from_snowflake import *
 import snowflake.connector
 # ## Basic setup and app layout
 # st.set_page_config(layout="wide")  # this needs to be the first Streamlit command called
