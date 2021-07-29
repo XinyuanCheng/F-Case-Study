@@ -1,59 +1,6 @@
-# from load_data_from_snowflake import *
+
 import snowflake.connector
-# ## Basic setup and app layout
-# st.set_page_config(layout="wide")  # this needs to be the first Streamlit command called
-# st.title("Which forecast is better: ours, or the market operators?")
 
-# DATE_COLUMN = 'date/time'
-# DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
-#             'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
-
-# @st.cache
-# def load_data(nrows):
-#     data = pd.read_csv(DATA_URL, nrows=nrows)
-#     lowercase = lambda x: str(x).lower()
-#     data.rename(lowercase, axis='columns', inplace=True)
-#     data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
-#     return data
-
-# data_load_state = st.text('Loading data...')
-# data = load_data(10000)
-# data_load_state.text("Done! (using st.cache)")
-
-# if st.checkbox('Show raw data'):
-#     st.subheader('Raw data')
-#     st.write(data)
-
-# st.subheader('Number of pickups by hour')
-# hist_values = np.histogram(data[DATE_COLUMN].dt.hour, bins=24, range=(0,24))[0]
-# st.bar_chart(hist_values)
-
-# # Some number in the range 0-23
-# hour_to_filter = st.slider('hour', 0, 23, 17)
-# filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
-
-# st.subheader('Map of all pickups at %s:00' % hour_to_filter)
-# st.map(filtered_data)
-
-# import streamlit as st
-# import pandas as pd
-# from load_data_from_snowflake import *
-# import datetime
-
-# from datetime import datetime
-
-# df = load_data()
-# df.sort_values('startTime')
-# pd.to_datetime(df['startTime'])
-# min_time = df['startTime'].min()
-# # max_time = df['startTime'].max()
-
-# start_time = st.slider(
-#      "When do you start?",
-#      value=min_time)
-# st.write("Start time:", start_time)
-
-# # @st.cache
 
 import streamlit as st
 
@@ -67,10 +14,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error 
 import matplotlib.pyplot as plt
 from pandas.tseries.holiday import USFederalHolidayCalendar as calendar
-import os
-
-os.environ['TZ'] = 'UTC'
-
 
 st.title("Which forecast is better: ours, or the market operators?")
 
@@ -106,12 +49,21 @@ def load_data():
 df = load_data()
 df.sort_values('startTime')
 
-st.markdown('This app is used to compared the performance of forecasting of electricity price between our performance and the market forecast performance.')
+st.markdown('This application is used to compare the performance of forecasting electricity prices between our forecast and the market forecast.')
+st.markdown('We have the actual price, our forecast and their forecast in the same timeframe.')
+st.markdown('By comparing different evaluation metrics (see sidebar for detailed information), we will be able to know which forecast is better.')
+
+st.sidebar.subheader('Notes on Metrics')
+st.sidebar.info('- **R-squared (R2)**, which is the proportion of variation in the outcome that is explained by the predictor variables. *The Higher the R-squared, the better the model*.')
+st.sidebar.info('- **Root Mean Squared Error (RMSE)**, which measures the average error performed by the model in predicting the outcome for an observation. MSE = mean((observeds - predicteds)^2) and RMSE = sqrt(MSE). *The lower the RMSE, the better the model*.')
+st.sidebar.info('- **Mean Absolute Error (MAE)**, like the RMSE, the MAE measures the prediction error. MAE = mean(abs(observeds - predicteds)). MAE is less sensitive to outliers compared to RMSE. *The lower the RMSE, the better the model.*')
 
 st.subheader('Part I: By Criteria')
 
+st.markdown('First, we would like to see how each forecast performs under certain conditions, such as weekdays, weekends and holidays.')
 
-criteria1 = ['Default', 'Weekday', 'Weekend', 'Holiday']
+
+criteria1 = ['All days', 'Weekday', 'Weekend', 'Holiday']
 criteria2 = ['R2', 'RMSE', 'MAE']
 
 choose1 = st.selectbox("Pick a criteria", criteria1)
@@ -119,7 +71,7 @@ choose2 = st.selectbox("Pick an evaluation metric", criteria2)
 
 
 # if st.sidebar.button('Get metrics performance'):
-if choose1 == 'Default':
+if choose1 == 'All days':
     if choose2 == 'R2':
         r2_1 = r2_score(df['actualValue'], df['ourForecast'])
         r2_2 = r2_score(df['actualValue'], df['theirForecast'])
@@ -346,21 +298,24 @@ if choose1 == 'Holiday':
 
 
 st.subheader('Part II: Define Your Timeframe')
-
+st.markdown('We are also interested in customizing timeframe to see which forecast is better over any timespan.')
 ## Range selector
 format = 'YYYY-MM-DD hh:mm:ss'  # format output
 
 # pd.to_datetime(df['startTime'])
 min_time = df['startTime'].min().to_pydatetime()
-start_date = min_time 
+
+# start_date = min_time 
 # start_date = dt.date(year=2021,month=1,day=1)-relativedelta(years=2)  #  I need some range in the past
 max_time = df['startTime'].max().to_pydatetime()
+
 # end_date = dt.datetime.now().date()-relativedelta(years=2)
 
 
 slider_range = st.slider("Choose timeframe", min_value = min_time, value=[min_time, max_time], format=format)
 
-st.write('Slider range:', slider_range[0], slider_range[1])
+# st.write('Slider range:', slider_range)
+# st.write('Slider range:', slider_range[0], slider_range[1])
 
 # metric values
 # R2
@@ -376,6 +331,7 @@ their_mae = mean_absolute_error(df[(df['startTime']<=slider_range[1])&(df['start
 # Table formatting
 data_table = [[our_r2, their_r2, "We are better" if our_r2 > their_r2 else "They are better"], [our_rmse, their_rmse, "We are better" if our_rmse < their_rmse else "They are better"], [our_mae, their_mae, "We are better" if our_mae < their_mae else "They are better"]]
 df_table = pd.DataFrame(data_table, columns = ['Our Forecast', 'Their Forecast', "Who has a better forecast?"], index = ['r2', 'rmse', 'mae'])
+st.write('Real_time evaluation metric performance')
 st.dataframe(df_table)
 
 # st.write('r2 score of our forecast:', our_r2)
@@ -390,11 +346,14 @@ st.dataframe(df_table)
 
 
 fig = px.line(df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])], x='startTime', y=df.columns[1:4])
+fig.update_layout(xaxis_title = 'time', yaxis_title = 'Electricity price ($/kWh)', title = 'Real-time electricity price and forecast')
 st.plotly_chart(fig)
 
 st.subheader('Part III: Forecast Outliers')
 
-st.write("This part lists top 20 of our prediction ourliers based on absolute difference")
+st.write('Finally we would like to explore times when we did not perform well. This would allow us (1) check if there are outliers and (2) improve forecast in the future.')
+
+st.write("This part lists top 20 of our prediction ourliers based on absolute difference.")
 
 df['our_abs'] = abs(df['actualValue'] - df['ourForecast'])
 # df[(df['startTime']<=slider_range[1])&(df['startTime']>=slider_range[0])].sort_values('our_abs',ascending=False)
